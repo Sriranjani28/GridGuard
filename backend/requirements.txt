@@ -1,0 +1,11 @@
+# GridGuard Backend Requirements
+# Pure-Python dependencies verified on Windows (MinGW/UCRT) and IBM LinuxONE (s390x)
+fastapi==0.109.2
+pydantic==1.10.26
+uvicorn==0.54.0
+starlette==0.36.3
+anyio==4.15.1
+click==8.5.0
+h11==0.16.0
+idna==3.20
+typing_extensions==4.16.0
