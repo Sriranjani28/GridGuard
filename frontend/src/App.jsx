@@ -23,7 +23,7 @@ function App() {
   // Navigation & operational state
   const [activeNav, setActiveNav] = useState('overview');
   const [activeRole, setActiveRole] = useState(USER_ROLES.ENGINEER);
-  const [selectedDate, setSelectedDate] = useState('2026-10-17');
+  const [selectedDate, setSelectedDate] = useState('2010-11-25');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Data states

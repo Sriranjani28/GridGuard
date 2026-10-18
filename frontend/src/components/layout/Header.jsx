@@ -48,7 +48,7 @@ export function Header({
             id="forecast-date-input"
             type="date"
             className="header-date-input"
-            value={selectedDate}
+            value={selectedDate} min="2006-12-24" max="2010-11-26"
             onChange={(e) => onDateChange(e.target.value)}
             aria-label="Select forecast date"
           />

@@ -4,11 +4,12 @@ Electricity demand forecasting and overload risk analysis service.
 Deployed for the IBM Z Datathon on IBM LinuxONE / z16 architecture.
 
 DEMO DATA ADVISORY:
-All telemetry and forecast endpoints currently serve deterministic synthetic demo data.
+Historical electricity demand is served using the trained ML model when DATA_SOURCE=ml.
 Demand Risk is a synthetic proxy score (0-100), not actual outage telemetry.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
+import os
 import logging
 from typing import List, Optional
 
@@ -35,7 +36,8 @@ except ValueError as e:
     logger.error("Startup error: %s", e)
     raise SystemExit(f"Configuration error: {e}")
 
-DEFAULT_DEMO_DATE = "2026-10-17"
+DATA_SOURCE = os.getenv("DATA_SOURCE", "ml").lower().strip()
+DEFAULT_DEMO_DATE = "2010-11-25" if DATA_SOURCE == "ml" else "2026-10-17"
 
 app = FastAPI(
     title="GridGuard Forecasting & Risk API",
@@ -69,7 +71,7 @@ async def add_custom_headers(request: Request, call_next):
     """Attach X-Data-Source: demo header to every /api/ response."""
     response: Response = await call_next(request)
     if request.url.path.startswith("/api/"):
-        response.headers["X-Data-Source"] = "demo"
+        response.headers["X-Data-Source"] = DATA_SOURCE
     return response
 
 
@@ -83,7 +85,16 @@ def _parse_and_validate_date(date: Optional[str]) -> str:
         # Ensure year is reasonable
         if parsed.year < 2000 or parsed.year > 2100:
             raise ValueError("Year out of supported range (2000-2100)")
+        if hasattr(provider, "start_date"):
+            first_date = provider.start_date + timedelta(days=8)
+            if parsed.date() < first_date or parsed.date() > provider.end_date:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Date must be between {first_date} and {provider.end_date}."
+                )
         return date
+    except HTTPException:
+        raise
     except ValueError as err:
         raise HTTPException(
             status_code=422,
@@ -115,7 +126,7 @@ def get_health() -> HealthResponse:
     """Service liveness and data source status check."""
     return HealthResponse(
         status="ok",
-        data_source="demo",
+        data_source=DATA_SOURCE,
         version="0.1.0",
     )
 

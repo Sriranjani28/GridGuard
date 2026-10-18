@@ -231,3 +231,7 @@ frontend/dist/
 # Python virtual environments
 .venv/
 backend/.venv/
+
+# Temporary files
+*.swp
+*.bak
